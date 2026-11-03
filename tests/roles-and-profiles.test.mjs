@@ -170,6 +170,15 @@ test('student status, rewards, posts and followers shortcuts stay reachable acro
   assert.ok(header.includes("label: 'Rewards', path: '/rewards'"));
 });
 
+test('Vercel configuration selects Express and avoids unmatched root function patterns', async () => {
+  const config = JSON.parse(await readFile(new URL('../vercel.json', import.meta.url), 'utf8'));
+  assert.equal(config.framework, 'express');
+  assert.equal(config.buildCommand, 'npm run build');
+  for (const pattern of Object.keys(config.functions || {})) {
+    assert.ok(pattern.startsWith('api/'), `Vercel function pattern ${pattern} must match an api/ function`);
+  }
+});
+
 test('Vercel root entrypoint exports the Express handler without opening a local listener', async () => {
   const entry = await import('../index.mjs');
   assert.equal(typeof entry.default, 'function');
