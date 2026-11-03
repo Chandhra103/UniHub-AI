@@ -1,5 +1,8 @@
 node_modules/
 dist/
+/public/index.html
+/public/assets/index-*.js
+/public/assets/index-*.css
 *.tsbuildinfo
 .env
 .env.*

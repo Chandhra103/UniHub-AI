@@ -1,0 +1,146 @@
+{
+  "defaultRole": "student",
+  "sharedPaths": ["/account/profile", "/settings", "/notifications"],
+  "pendingPaths": ["/pending", "/account/profile", "/settings"],
+  "roles": [
+    {
+      "id": "student",
+      "label": "Student",
+      "home": "/dashboard",
+      "requiresVerification": false,
+      "nav": [
+        { "label": "Events", "path": "/events", "icon": "calendar" },
+        { "label": "Internships & jobs", "path": "/opportunities", "icon": "briefcase" },
+        { "label": "Hackathons", "path": "/hackathons", "icon": "code" },
+        { "label": "AI tools", "path": "/ai-tools", "icon": "tools" },
+        { "label": "Learning", "path": "/courses", "icon": "book" },
+        { "label": "Community", "path": "/community", "icon": "users" }
+      ],
+      "allowedPrefixes": ["/dashboard", "/profile", "/events", "/opportunities", "/internships", "/jobs", "/hackathons", "/scholarships", "/courses", "/government-portals", "/ai-tools", "/ai-hub", "/colleges", "/organizations", "/community", "/posts", "/connections", "/messages", "/applications", "/saved", "/rewards", "/notifications", "/settings"],
+      "permissions": ["opportunities.read", "applications.create_own", "applications.read_own", "events.read", "events.register_own", "learning.read", "community.read", "community.create_own", "rewards.read", "profile.read_own", "profile.update_own"]
+    },
+    {
+      "id": "job_seeker",
+      "label": "Job Seeker",
+      "home": "/job-seeker/dashboard",
+      "requiresVerification": false,
+      "nav": [
+        { "label": "Find jobs", "path": "/jobs", "icon": "briefcase" },
+        { "label": "Internships", "path": "/internships", "icon": "calendar" },
+        { "label": "Applications", "path": "/job-seeker/applications", "icon": "file" },
+        { "label": "Career guidance", "path": "/job-seeker/guidance", "icon": "compass" },
+        { "label": "Professional profile", "path": "/profile", "icon": "user" }
+      ],
+      "allowedPrefixes": ["/job-seeker", "/jobs", "/internships", "/applications", "/profile", "/career-guidance", "/messages", "/notifications", "/settings"],
+      "permissions": ["opportunities.read", "applications.create_own", "applications.read_own", "career_guidance.read", "profile.read_own", "profile.update_own"]
+    },
+    {
+      "id": "college",
+      "label": "College",
+      "home": "/college/dashboard",
+      "requiresVerification": true,
+      "nav": [
+        { "label": "Overview", "path": "/college/dashboard", "icon": "chart" },
+        { "label": "Students", "path": "/college/students", "icon": "users" },
+        { "label": "Campus roles", "path": "/college/opportunities", "icon": "briefcase" },
+        { "label": "Events", "path": "/college/events", "icon": "calendar" },
+        { "label": "Learning programmes", "path": "/college/programmes", "icon": "book" },
+        { "label": "Engagement", "path": "/college/analytics", "icon": "chart" }
+      ],
+      "allowedPrefixes": ["/college"],
+      "permissions": ["students.read_org", "opportunities.manage_org", "events.manage_org", "programmes.manage_org", "analytics.read_org", "profile.update_org"]
+    },
+    {
+      "id": "company",
+      "label": "Company",
+      "home": "/company/dashboard",
+      "requiresVerification": true,
+      "nav": [
+        { "label": "Overview", "path": "/company/dashboard", "icon": "chart" },
+        { "label": "Jobs & internships", "path": "/company/opportunities", "icon": "briefcase" },
+        { "label": "Applicants", "path": "/company/applicants", "icon": "users" },
+        { "label": "Recruitment", "path": "/company/recruitment", "icon": "target" },
+        { "label": "Company analytics", "path": "/company/analytics", "icon": "chart" }
+      ],
+      "allowedPrefixes": ["/company"],
+      "permissions": ["opportunities.manage_org", "applications.read_org", "applications.update_org", "recruitment.manage_org", "analytics.read_org", "profile.update_org"]
+    },
+    {
+      "id": "recruiter",
+      "label": "Recruiter",
+      "home": "/recruiter/dashboard",
+      "requiresVerification": true,
+      "nav": [
+        { "label": "Overview", "path": "/recruiter/dashboard", "icon": "chart" },
+        { "label": "Candidates", "path": "/recruiter/candidates", "icon": "search" },
+        { "label": "Applicants", "path": "/recruiter/applicants", "icon": "users" },
+        { "label": "Shortlist", "path": "/recruiter/shortlist", "icon": "star" },
+        { "label": "Recruitment activity", "path": "/recruiter/activities", "icon": "target" }
+      ],
+      "allowedPrefixes": ["/recruiter"],
+      "permissions": ["candidates.search", "applications.read_org", "applications.update_org", "recruitment.manage_org", "profile.update_org"]
+    },
+    {
+      "id": "event_organizer",
+      "label": "Event Organizer",
+      "home": "/organizer/dashboard",
+      "requiresVerification": true,
+      "nav": [
+        { "label": "Overview", "path": "/organizer/dashboard", "icon": "chart" },
+        { "label": "Events", "path": "/organizer/events", "icon": "calendar" },
+        { "label": "Registrations", "path": "/organizer/registrations", "icon": "file" },
+        { "label": "Participants", "path": "/organizer/participants", "icon": "users" },
+        { "label": "Event analytics", "path": "/organizer/analytics", "icon": "chart" }
+      ],
+      "allowedPrefixes": ["/organizer"],
+      "permissions": ["events.manage_org", "registrations.read_org", "participants.manage_org", "analytics.read_org", "profile.update_org"]
+    },
+    {
+      "id": "teacher_researcher",
+      "label": "Teacher & Researcher",
+      "home": "/academic/dashboard",
+      "requiresVerification": false,
+      "nav": [
+        { "label": "Overview", "path": "/academic/dashboard", "icon": "chart" },
+        { "label": "Learning resources", "path": "/academic/resources", "icon": "book" },
+        { "label": "Research", "path": "/academic/research", "icon": "search" },
+        { "label": "Academic events", "path": "/academic/events", "icon": "calendar" },
+        { "label": "Community", "path": "/academic/community", "icon": "users" }
+      ],
+      "allowedPrefixes": ["/academic"],
+      "permissions": ["learning.read", "research.read", "research.create", "academic_events.read", "community.read", "community.create_own", "profile.update_own"]
+    },
+    {
+      "id": "ngo_training",
+      "label": "NGO & Training Organization",
+      "home": "/ngo/dashboard",
+      "requiresVerification": true,
+      "nav": [
+        { "label": "Overview", "path": "/ngo/dashboard", "icon": "chart" },
+        { "label": "Programmes", "path": "/ngo/programmes", "icon": "book" },
+        { "label": "Participants", "path": "/ngo/participants", "icon": "users" },
+        { "label": "Cohorts", "path": "/ngo/cohorts", "icon": "users" },
+        { "label": "Engagement", "path": "/ngo/engagement", "icon": "chart" }
+      ],
+      "allowedPrefixes": ["/ngo"],
+      "permissions": ["programmes.manage_org", "participants.read_org", "engagement.read_org", "profile.update_org"]
+    },
+    {
+      "id": "admin",
+      "label": "Administrator",
+      "home": "/admin/dashboard",
+      "requiresVerification": false,
+      "adminAllowlistOnly": true,
+      "nav": [
+        { "label": "Overview", "path": "/admin/dashboard", "icon": "chart" },
+        { "label": "User verification", "path": "/admin/verifications", "icon": "shield" },
+        { "label": "Users & roles", "path": "/admin/users", "icon": "users" },
+        { "label": "Moderation", "path": "/admin/moderation", "icon": "shield" },
+        { "label": "Analytics", "path": "/admin/analytics", "icon": "chart" },
+        { "label": "Audit log", "path": "/admin/audit", "icon": "file" }
+      ],
+      "allowedPrefixes": ["/admin"],
+      "permissions": ["users.verify", "roles.manage", "content.moderate", "analytics.read_platform", "audit.read"]
+    }
+  ]
+}

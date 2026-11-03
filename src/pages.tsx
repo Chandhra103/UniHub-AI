@@ -14,6 +14,7 @@ import {
 } from './data';
 import type { EventItem, Opportunity } from './data';
 import type { AppActions } from './types';
+import type { AuthenticatedUser } from './auth/types';
 import {
   BrandMark, Chip, EmptyState, Modal, PageHeading, PrimaryButton, SearchField,
   SectionHeader, SoftButton, StatCard, TextButton,
@@ -39,12 +40,16 @@ function ProfileTabContent({ active, navigate }: { active: string; navigate: (pa
   return <div className="profile-tab-panel"><span className="profile-tab-symbol"><Users size={23} /></span><div><h3>{panel.title}</h3><p>{panel.subtitle}</p></div><SoftButton onClick={() => navigate(panel.path)}>{panel.button}<ArrowRight size={16} /></SoftButton></div>;
 }
 
-export function DashboardPage({ navigate, toast }: AppActions & { path: string }) {
+export function DashboardPage({ navigate, toast, user, saveProfile }: AppActions & { path: string; user: AuthenticatedUser; saveProfile?: (patch: { displayName: string; profile: Record<string, unknown> }) => Promise<void> }) {
   const [activeTab, setActiveTab] = useState('Status');
   const [showEdit, setShowEdit] = useState(false);
-  const [skills, setSkills] = useState(['React', 'Python', 'SQL', 'JavaScript', 'Machine Learning', 'Data Analysis', 'Power BI']);
+  const profileSkills = Array.isArray(user.profile.skills) ? user.profile.skills.filter((skill): skill is string => typeof skill === 'string') : [];
+  const [skills, setSkills] = useState(profileSkills.length ? profileSkills : ['React', 'Python', 'SQL', 'JavaScript', 'Machine Learning', 'Data Analysis', 'Power BI']);
   const [draftSkill, setDraftSkill] = useState('');
-  const [name, setName] = useState('Ananya Reddy');
+  const [name, setName] = useState(user.displayName || 'UniHub student');
+  const [university, setUniversity] = useState(typeof user.profile.university === 'string' ? user.profile.university : 'GITAM University');
+  const [course, setCourse] = useState(typeof user.profile.fieldOfStudy === 'string' ? user.profile.fieldOfStudy : 'Computer Science · Final Year');
+  const [savingProfile, setSavingProfile] = useState(false);
   const tabs = [
     { label: 'Connections', icon: <Users size={22} fill="currentColor" /> },
     { label: 'Followers', icon: <Users size={23} fill="currentColor" /> },
@@ -52,14 +57,30 @@ export function DashboardPage({ navigate, toast }: AppActions & { path: string }
     { label: 'Rewards', icon: <Award size={22} fill="currentColor" /> },
     { label: 'Status', icon: <TrendingUp size={23} /> },
   ];
+  const saveStudentProfile = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const nextSkills = draftSkill.trim() && !skills.includes(draftSkill.trim()) ? [...skills, draftSkill.trim()] : skills;
+    setSkills(nextSkills);
+    setSavingProfile(true);
+    try {
+      await saveProfile?.({ displayName: name, profile: { university, fieldOfStudy: course, skills: nextSkills } });
+      toast('Your profile updates have been saved');
+      setShowEdit(false);
+    } catch (error) {
+      toast(error instanceof Error ? error.message : 'Your profile could not be saved. Please try again.');
+    } finally {
+      setSavingProfile(false);
+      setDraftSkill('');
+    }
+  };
 
   return <div className="dashboard-page">
     <section className="profile-hero">
-      <img className="profile-avatar" src="/assets/ananya-avatar.png" alt="Ananya Reddy" />
+      {user.displayName === 'Ananya Reddy' ? <img className="profile-avatar" src="/assets/ananya-avatar.png" alt={user.displayName} /> : <span className="profile-avatar profile-avatar-initials" aria-label={`${user.displayName} profile`}>{user.displayName.trim().split(/\s+/).map((part) => part[0]).slice(0, 2).join('').toUpperCase()}</span>}
       <div className="profile-identity">
         <h1>{name}</h1>
-        <div className="profile-contact"><span><span className="contact-icon">☎</span> +91 98765 43210</span><span><span className="contact-icon">✉</span> ananya@gitam.edu</span></div>
-        <div className="profile-tags"><Chip>GITAM University</Chip><Chip>Computer Science</Chip><Chip>Final Year</Chip></div>
+        <div className="profile-contact">{typeof user.profile.phone === 'string' && user.profile.phone && <span><span className="contact-icon">☎</span> {user.profile.phone}</span>}<span><span className="contact-icon">✉</span> {user.email || 'Add your email'}</span></div>
+        <div className="profile-tags"><Chip>{university}</Chip><Chip>{course.split('·')[0].trim()}</Chip><Chip>{typeof user.profile.graduationYear === 'string' ? user.profile.graduationYear : 'Student'}</Chip></div>
       </div>
       <div className="profile-note"><p>Learning today<br />for a brighter tomorrow</p><SoftButton onClick={() => setShowEdit(true)}><PenLine size={17} /> Edit profile</SoftButton></div>
     </section>
@@ -122,13 +143,13 @@ export function DashboardPage({ navigate, toast }: AppActions & { path: string }
     <section className="dashboard-next-step"><div className="next-step-icon"><Sparkles size={20} /></div><div><strong>Your next step is ready</strong><p>Three opportunities match your skills and preferred locations.</p></div><SoftButton onClick={() => navigate('/opportunities')}>Explore matches <ArrowRight size={16} /></SoftButton></section>
 
     {showEdit && <Modal title="Edit your profile" subtitle="Keep your student profile current so opportunities find you." onClose={() => setShowEdit(false)}>
-      <form className="modal-form" onSubmit={(event) => { event.preventDefault(); const skill = draftSkill.trim(); if (skill && !skills.includes(skill)) setSkills((current) => [...current, skill]); setDraftSkill(''); setShowEdit(false); toast('Your profile updates have been saved'); }}>
+      <form className="modal-form" onSubmit={(event) => void saveStudentProfile(event)}>
         <label>Full name<input value={name} onChange={(event) => setName(event.target.value)} /></label>
-        <label>University<input defaultValue="GITAM University" /></label>
-        <label>Course and year<input defaultValue="Computer Science · Final Year" /></label>
+        <label>University<input value={university} onChange={(event) => setUniversity(event.target.value)} /></label>
+        <label>Course and year<input value={course} onChange={(event) => setCourse(event.target.value)} /></label>
         <label>Add a skill<input value={draftSkill} onChange={(event) => setDraftSkill(event.target.value)} placeholder="e.g. Product design" /></label>
         <div className="modal-skill-list">{skills.slice(0, 5).map((skill) => <Chip key={skill}>{skill}</Chip>)}</div>
-        <PrimaryButton type="submit">Save profile <Check size={16} /></PrimaryButton>
+        <PrimaryButton type="submit" disabled={savingProfile}>{savingProfile ? 'Saving…' : 'Save profile'} <Check size={16} /></PrimaryButton>
       </form>
     </Modal>}
   </div>;

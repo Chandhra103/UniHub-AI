@@ -4,13 +4,21 @@
   "private": true,
   "type": "module",
   "packageManager": "npm@10.9.9",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
-    "dev": "vite --host 0.0.0.0",
-    "build": "tsc -b && vite build",
-    "preview": "vite preview --host 0.0.0.0"
+    "dev": "node server/index.mjs --dev",
+    "start": "node server/index.mjs",
+    "build": "tsc -b && vite build && node scripts/sync-vercel-assets.mjs",
+    "db:migrate": "node server/migrate.mjs",
+    "test": "node --test"
   },
   "dependencies": {
+    "express": "5.1.0",
+    "jsonwebtoken": "9.0.2",
     "lucide-react": "0.468.0",
+    "mysql2": "3.15.2",
     "react": "19.1.0",
     "react-dom": "19.1.0"
   },

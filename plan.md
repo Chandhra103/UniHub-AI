@@ -1,55 +1,54 @@
-# UniHub AI — Implementation Plan
+# UniHub AI — Role-Based Expansion Plan
 
 ## Product and implementation approach
 
-Build a responsive, frontend-only student opportunity and community application using React, TypeScript, and Vite in the initialized empty WebDev workspace. Use local mock data and React state/localStorage for demo interactions; do not enable or implement backend, database, account services, or remote persistence. Keep routes client-side and provide a static `/manus-routes.json` manifest. Organize shared shell, page modules, mock data, and UI primitives so that the many related destinations remain consistent without becoming duplicated generic pages.
+Extend the existing React, TypeScript and Vite application in place; do not replace its scaffold, routes, reference-matched profile dashboard, mock opportunity content or established visual system. Add a Node server and the approved managed MySQL capability for real Manus account authentication, persistent account/profile data and server-enforced role permissions. Keep existing student-facing features working while replacing the single generic organization workspace route with nine genuinely distinct role experiences.
 
-The provided UniHub profile-status screen is the primary visual reference. Preserve the teal masthead and profile control, white category navigation with icon-led labels, light cool-gray page background, navy type, white cards with subtle borders/shadows, blue links/accents, and orange active Status/action treatments. The AICTE reference page is secondary context specifically for internship/opportunity discovery: carry over its warm cream/white surfaces, confident navy headings, orange search/action emphasis, and employer/program cards while keeping the UniHub navigation system. Other missing screen details will be interpreted through the user's named screen requirements and the primary screenshot's visual language rather than copied from an unrelated site.
+The role model is `student`, `job_seeker`, `college`, `company`, `recruiter`, `event_organizer`, `teacher_researcher`, `ngo_training`, and `admin`. Role is resolved from the server-side user record, never from a client-supplied role field or URL. Students and job seekers can complete self-service onboarding. Organization, recruiter and publishing roles are requested at onboarding and remain pending/restricted until verified by an administrator. Admin is never self-selectable; an exact server-side allowlist or existing authorized admin assignment is required. Every user has an independently stored profile; profile updates merge only supplied fields and cannot change the authenticated identity or privilege fields.
 
-### Route and content architecture
+## Role experiences
 
-- `/login`: separate Student and Organization login panels with usable mock validation and role-aware entry.
-- `/dashboard` and `/profile`: student home/profile overview, using the provided profile-status dashboard as the default home. Include profile identity, connections/followers/posts/rewards/status tabs, metrics, applications/interviews/offers, learning progress, earnings trend, skills, and achievements/recent wins.
-- `/events`, `/events/festivals`, `/events/meetups`: event discovery with city search, interactive lightweight map/list selection, category/date filters, sorting, detail drawer and save/apply state.
-- `/opportunities`, `/internships`, `/jobs`, `/hackathons`, `/scholarships`, `/courses`, `/government-portals`: opportunity hub with separate category data, search/filter/sort controls, organization context, detail views, bookmarks and frontend application actions.
-- `/ai-tools`, `/ai-hub`: categorized student tools, tool cards and functional mock interactions.
-- `/colleges`, `/organizations`: discovery and rich organization/college profile views.
-- `/community`, `/posts`, `/connections`, `/messages`: feed, connections and messaging experiences with working local UI state.
-- `/applications`, `/saved`, `/rewards`, `/notifications`, `/settings`: student workflow pages with filterable records, saved items, points/rewards, notification controls and settings forms.
-- `/organization/college`, `/organization/company`, `/organization/events`, `/admin`: distinct dashboard views for colleges, companies, event organizers and administrators, each with role-specific summaries, tables and controls.
+Keep the existing Student home, opportunities, events, AI, learning, community, saved-items and rewards experiences under a student-only navigation model. Add distinct Job Seeker career search, applications, guidance and professional-profile pages. Provide separate workspaces for Colleges (student management, campus roles/events/programmes, engagement analytics), Companies (job/internship publishing, applicant pipeline and recruitment analytics), Recruiters (candidate search, shortlist, applicant management and activities), Event Organizers (event creation, registrations, participant roster and attendance/analytics), Teachers and Researchers (learning resources, research opportunities, academic events and community), NGOs and Training Organizations (programme publishing, participants, cohorts and engagement), and Admin (role/user verification, moderation queues and platform analytics). A shared card/button/modal vocabulary is acceptable; each role gets its own task order, data, route set, panels, actions and navigation—not a renamed copy of one dashboard.
 
-Use a shared header/profile toolbar, responsive category navigation, route-aware subnavigation, page title/action rows, and reusable but content-specific cards, filters, forms, tabs, tables, empty states, dialogs and drawers. Provide realistic India-focused sample organizations, locations, dates, stipends, eligibility, skills and application states. Local state will make search, filters, sorting, tab changes, dropdowns, modal forms, bookmarking, application actions, messaging, notification preferences and responsive navigation demonstrably functional.
+## Authentication, permissions and persistence
+
+Use the platform Manus OAuth flow (the default provider for this project), not an app-owned password system or fake Preview identity. Start OAuth with a one-time nonce bound to the initiating browser, a fixed in-app callback, and a single-use state value. Exchange codes and retrieve user identity only on the server using platform-injected values. Use the exact `webdev_app_session` cookie expected by Cloud Preview, validate HS256 signature, expiry and `appId` against `MANUS_PROJECT_ID`, then resolve `openId` and active account/role from MySQL. Set HTTP-only, `Secure; SameSite=None` cookies for HTTPS Preview; do not infer public origin from the internal proxied Host.
+
+Use additive, idempotent schema migrations only; development, testing and published deployments share the managed database. Create normalized users, organizations/memberships, role requests, opportunities/applications, events/registrations, learning programmes/enrolments and audit/verification records. Each API endpoint authenticates first, checks the permitted role and scopes organization-owned queries by the authenticated user's active membership. Admin actions require an active admin record. A user cannot grant themselves admin, activate a pending organization, change ownership or read another user's private profile/application data. Profile updates lock/load the existing row, merge only allowlisted supplied fields, and preserve all omitted values.
 
 ## Project structure
 
-- `src/main.tsx`, `src/App.tsx`: application bootstrap, route map and shared navigation.
-- `src/components.tsx`: shared masthead, category navigation, responsive mobile navigation, buttons, cards, filters, badges, dialogs and form controls.
-- `src/pages.tsx`: route-level login, student dashboard/profile, events, opportunities, discovery/community, student workflow, learning and organization/admin dashboards.
-- `src/data.ts`, `src/types.ts`: typed mock data and shared action contracts for people, events, opportunities, courses, colleges, organizations, applications, rewards and messages.
-- `src/styles.css`: global design tokens, layout, reusable components and responsive page styling.
-- `public/manus-routes.json`, `public/assets/`: source-derived route manifest and profile/brand assets.
-- `index.html`, `package.json`, `package-lock.json`, `tsconfig.json`, `vite.config.ts`: Vite app entry, pinned dependencies and frontend build configuration.
-- `plan.md`, `TODO.md`: approved scope/design and outcome tracking.
+- `src/App.tsx`, `src/main.tsx`: existing client router and bootstrap, extended with session loading, role-based route guards and post-login landing.
+- `src/auth/`: session provider, sign-in, role onboarding and account-profile forms.
+- `src/roles.ts`: canonical role definitions, route maps, menu definitions and client display metadata; server permissions remain authoritative.
+- `src/role-dashboards/`: distinct student, job-seeker, college, company, recruiter, event-organizer, teacher/researcher, NGO/training and admin pages/workflows.
+- `src/components.tsx`, `src/pages.tsx`, `src/profile.tsx`, `src/data.ts`, `src/styles.css`: preserve and reuse the established design primitives, existing student pages and frontend sample content; extract role content rather than duplicating a generic workspace.
+- `server/index.mjs` and root `index.mjs`: Express API/health entry; Vite middleware in local development, container listener only when directly executed, and a default-export Express handler for Vercel.
+- `server/auth.mjs`, `server/permissions.mjs`, `server/db.mjs`: OAuth/cookie/session logic, authorization checks, MySQL pool and request-scoped identity.
+- `server/migrations/`: ordered, additive SQL schema with a migration ledger; no destructive migrations or test-account seed writes.
+- `tests/`: isolated role-policy, route/menu, profile-merge and API authorization tests using fixture identities without writes to the shared managed database.
+- `public/manus-routes.json`: source-derived browser page routes only, excluding API/callback/health endpoints.
+- Root `Dockerfile`, `vercel.json`, build scripts and lockfile: preserve the existing Manus/container path and add Vercel's Express framework entry, public static asset synchronization, and reproducible build/test commands.
 
 ## Design decisions
 
 - **Design Movement:** polished Indian student-services dashboard, following the supplied UniHub profile screen's restrained institutional product aesthetic.
-- **Core Principles:** keep high-value student status visible; organize discovery by clear categories; use consistent, calm data cards; make primary next steps obvious and orange-accented.
-- **Color Philosophy:** deep teal anchors identity and trust; navy supplies readable structure; cool pale gray recedes behind white information surfaces; bright orange signals the active section and the next action; blue and green support links and positive progress.
-- **Layout Paradigm:** full-width masthead, horizontal icon-led category rail, then a spacious dashboard canvas with aligned metric tiles and balanced two-column analytical panels; collapse navigation and analytics cleanly on smaller screens.
-- **Signature Elements:** teal UniHub masthead with graduation-cap mark; orange selected navigation/action capsule; small tinted circular metric icons and subtle outlined white cards.
-- **Interaction Philosophy:** controls remain close to the content they affect, filters can be cleared, saved/applied states are visible, and drawers/dialogs keep discovery in context.
+- **Core Principles:** keep high-value student status visible; organize discovery by role-specific tasks; use consistent, calm data cards; make each role's primary next step obvious and permission-safe.
+- **Color Philosophy:** preserve deep teal `#147C89` for trusted identity, navy for readable structure, cool pale gray behind white surfaces, orange for active sections/actions, and blue/green for navigation and positive progress. Organization dashboards share the system, not identical layouts.
+- **Layout Paradigm:** retain the full-width teal masthead and icon-led white navigation; show a role-specific navigation rail/workspace canvas with each role's own information hierarchy and task panels, collapsing cleanly on smaller screens.
+- **Signature Elements:** teal UniHub masthead with graduation-cap mark; orange selected navigation/action capsule; small tinted metric icons and subtle outlined white cards.
+- **Interaction Philosophy:** controls sit beside the information they affect; every role sees only authorized actions; status/verification states are explicit; profile edits preserve unsupplied values.
 - **Animation:** restrained transitions on tab changes, hover/focus, drawer entry and mobile navigation; no motion that obscures data, and honor reduced-motion preferences.
-- **Typography System:** use a clean sans-serif family with strong navy weight contrast; compact interface labels and medium-weight section titles; preserve the screenshot's clear hierarchy and comfortable line height.
-- **Brand Essence:** a practical opportunity and progress hub for Indian students; capable, encouraging, organized.
+- **Typography System:** clean sans-serif family with strong navy weight contrast; compact interface labels and medium-weight section titles; retain the reference screenshot hierarchy and comfortable line height.
+- **Brand Essence:** a practical opportunity, community and management hub for Indian students and the organizations supporting them; capable, encouraging, organized.
 - **Brand Voice:** concise and momentum-focused. Examples: “Your next opportunity, all in one place.” “Keep your progress moving.”
 - **Wordmark & Logo:** “UniHub AI” wordmark paired with a simple graduation-cap glyph and a restrained teal lockup.
 - **Signature Brand Color:** deep teal `#147C89`.
 
-## Material constraints
+## Material constraints and safety boundaries
 
-The deliverable is a frontend prototype. Authentication and application flows are demonstrations only; saved data is browser-local and is not shared between users or devices. The provided screenshots are not a complete source for every requested route, so missing screen-specific details follow the named feature requirements while retaining the main screenshot's visual language. No claims of live map data, real listings, AI service execution, or external application submission will be made.
+Managed server and database enablement has been explicitly approved. The database is shared between Preview/development, testing and published operation. Use additive DDL and fixture-only tests; do not populate test users or run destructive writes against the shared database. OAuth must use the platform's injected runtime credentials; never expose those credentials in browser code. Do not claim nine live-account sign-ins unless separate real authorized Manus accounts are available. A role matrix/test harness can be exercised with isolated fixtures, while actual OAuth identities can be verified only by signing in with those real accounts. Any missing admin allowlist or test identity remains an explicit setup prerequisite, not a client-side bypass.
 
 ## Build and serving
 
-Use a self-contained Vite build with locked dependencies and an output directory suitable for static frontend hosting. Serve the development preview on the initialized project port (3000), maintain a source-derived route manifest, run TypeScript/build checks, and verify the main dashboard, opportunities, events and login routes at desktop and a narrow viewport. No backend service or database is needed.
+Keep the existing Vite/React UI. Run one Node/Express process on the configured port, mounting Vite's middleware in development and serving `dist` in the Manus container; export the same Express handler for Vercel and sync compiled files into `public/` so Vercel can serve static assets. Provide authenticated APIs under `/api/` and unauthenticated `/_app/health`. Use the committed lockfile, honor `PORT` with 3000 as default, and preserve Preview iframe compatibility. Vercel requires a MySQL endpoint reachable from Vercel and server-side OAuth/session values configured independently; platform secrets/database values are not copied to the external host. Keep the route manifest synchronized. Build and role-policy checks run before checkpointing; any test that contacts MySQL is read-only unless the user separately approves an application operation.
