@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_DATABASE: unihub_test
+          MYSQL_USER: unihub
+          MYSQL_PASSWORD: unihub-test
+          MYSQL_ROOT_PASSWORD: root-test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot-test --silent"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+          --health-start-period=20s
+    env:
+      DATABASE_URL: mysql://unihub:unihub-test@127.0.0.1:3306/unihub_test
+      UNIHUB_TEST_DATABASE_URL: mysql://unihub:unihub-test@127.0.0.1:3306/unihub_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npx --yes npm@12.2.1 ci
+      - name: Apply database migrations
+        run: npx --yes npm@12.2.1 run db:migrate
+      - name: Run role, auth and MySQL integration tests
+        run: npx --yes npm@12.2.1 test
+      - name: Build production assets
+        run: npx --yes npm@12.2.1 run build
+      - name: Audit dependencies
+        run: npx --yes npm@12.2.1 audit

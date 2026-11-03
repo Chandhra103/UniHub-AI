@@ -1,0 +1,46 @@
+services:
+  database:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-unihub}
+      MYSQL_USER: ${MYSQL_USER:-unihub}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-local-unihub-only}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-local-root-only}
+    ports:
+      - "127.0.0.1:${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - unihub_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u\"$${MYSQL_USER}\" -p\"$${MYSQL_PASSWORD}\" --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+  app:
+    build: .
+    restart: unless-stopped
+    init: true
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DATABASE_URL: mysql://${MYSQL_USER:-unihub}:${MYSQL_PASSWORD:-local-unihub-only}@database:3306/${MYSQL_DATABASE:-unihub}
+      MANUS_PROJECT_ID: ${MANUS_PROJECT_ID:-}
+      MANUS_JWT_SECRET: ${MANUS_JWT_SECRET:-}
+      MANUS_OAUTH_PORTAL_URL: ${MANUS_OAUTH_PORTAL_URL:-}
+      MANUS_OAUTH_API_URL: ${MANUS_OAUTH_API_URL:-}
+      UNIHUB_ADMIN_EMAILS: ${UNIHUB_ADMIN_EMAILS:-}
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - .:/app
+      - unihub_node_modules:/app/node_modules
+    command: ["sh", "-c", "npm ci && npm run db:migrate && npm run dev"]
+
+volumes:
+  unihub_mysql_data:
+  unihub_node_modules:
