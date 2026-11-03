@@ -1,6 +1,6 @@
 # Deploying UniHub AI on Vercel
 
-This repository combines the existing React/Vite frontend with its Express API. The root `index.mjs` exports the Express app in Vercel's supported Node entrypoint format. `vercel.json` pins the Express framework preset and runs `npm run build`; the build compiles the Vite app and synchronizes its output, `manus-routes.json`, and brand assets into `public/`. Vercel serves files in `public/` as static assets, while the Express application handles OAuth, authenticated APIs, SPA fallback routes, and `/_app/health`.
+This repository combines the existing React/Vite frontend with its Express API. The root `index.mjs` directly imports and creates an Express app, then mounts the existing application from `server/index.mjs`; this is the entrypoint detected by Vercel's Express preset. `vercel.json` pins that preset and runs `npm run build`. The build compiles the Vite app and synchronizes its output, `manus-routes.json`, and brand assets into `public/`. Vercel serves files in `public/` as static assets, while the Express application handles OAuth, authenticated APIs, SPA fallback routes, and `/_app/health`.
 
 Do not add a `functions` pattern for the root `index.mjs`. Vercel's `functions` property is for matching function source files under `api/`, which is why a root pattern such as `"index.mjs"` fails with `unused_function`.
 
@@ -38,7 +38,7 @@ Before declaring a deployment production-ready, verify the static route manifest
 
 ## References
 
-- [Express on Vercel](https://vercel.com/docs/frameworks/backend/express) — Express entrypoint and static asset behavior.
+- [Express on Vercel](https://vercel.com/docs/frameworks/backend/express) — supported Express entrypoint locations and static asset behavior.
 - [Vercel project configuration](https://vercel.com/docs/project-configuration/vercel-json) — framework presets and function patterns.
 - [Unmatched function pattern error](https://vercel.com/docs/errors/error-list) — Vercel's requirements for the `functions` key.
 - [Supported Node.js versions on Vercel](https://vercel.com/docs/functions/runtimes/node-js/node-js-versions) — available Node.js majors and `engines.node` mapping.

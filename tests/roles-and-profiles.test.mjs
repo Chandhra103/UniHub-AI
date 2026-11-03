@@ -185,6 +185,12 @@ test('Vercel build pins a supported Node major and approves only the pinned esbu
   assert.equal(manifest.allowScripts?.['esbuild@0.25.12'], true);
 });
 
+test('Vercel Express root entrypoint imports and constructs Express directly', async () => {
+  const source = await readFile(new URL('../index.mjs', import.meta.url), 'utf8');
+  assert.match(source, /import express from ['"]express['"]/);
+  assert.match(source, /const app\s*=\s*express\(\)/);
+});
+
 test('Vercel root entrypoint exports the Express handler without opening a local listener', async () => {
   const entry = await import('../index.mjs');
   assert.equal(typeof entry.default, 'function');
