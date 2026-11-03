@@ -45,6 +45,9 @@ function secondaryLinks(role: AccountRole): Link[] {
     { label: 'Settings', path: '/settings', icon: 'tools' },
   ];
   if (role === 'student') return [
+    { label: 'Status', path: '/dashboard/status', icon: 'chart' },
+    { label: 'Followers', path: '/followers', icon: 'users' },
+    { label: 'Posts', path: '/posts', icon: 'file' },
     { label: 'Government portals', path: '/government-portals', icon: 'landmark' },
     { label: 'Scholarships', path: '/scholarships', icon: 'book' },
     { label: 'College festivals', path: '/events/festivals', icon: 'calendar' },

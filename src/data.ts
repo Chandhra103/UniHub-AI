@@ -78,12 +78,12 @@ export const organizations = [
 ];
 
 export const people = [
-  { name: 'Meera Shah', role: 'UX Designer · IIT Bombay', initials: 'MS', color: 'purple', mutual: 12, activeMinutes: 7 },
-  { name: 'Arjun Nair', role: 'Computer Science · PES University', initials: 'AN', color: 'blue', mutual: 8, activeMinutes: 18 },
-  { name: 'Fatima Khan', role: 'Data Science · Osmania University', initials: 'FK', color: 'pink', mutual: 16, activeMinutes: 3 },
-  { name: 'Rohan Iyer', role: 'Product Intern · Razorpay', initials: 'RI', color: 'orange', mutual: 6, activeMinutes: 5 },
-  { name: 'Sana Gupta', role: 'Mechanical Engineering · IIT Delhi', initials: 'SG', color: 'teal', mutual: 21, activeMinutes: 12 },
-  { name: 'Dev Patel', role: 'Full-stack developer · GITAM', initials: 'DP', color: 'green', mutual: 11, activeMinutes: 9 },
+  { name: 'Meera Shah', role: 'UX Designer · IIT Bombay', initials: 'MS', color: 'purple', mutual: 12, activeMinutes: 7, followsYou: true },
+  { name: 'Arjun Nair', role: 'Computer Science · PES University', initials: 'AN', color: 'blue', mutual: 8, activeMinutes: 18, followsYou: true },
+  { name: 'Fatima Khan', role: 'Data Science · Osmania University', initials: 'FK', color: 'pink', mutual: 16, activeMinutes: 3, followsYou: true },
+  { name: 'Rohan Iyer', role: 'Product Intern · Razorpay', initials: 'RI', color: 'orange', mutual: 6, activeMinutes: 5, followsYou: false },
+  { name: 'Sana Gupta', role: 'Mechanical Engineering · IIT Delhi', initials: 'SG', color: 'teal', mutual: 21, activeMinutes: 12, followsYou: true },
+  { name: 'Dev Patel', role: 'Full-stack developer · GITAM', initials: 'DP', color: 'green', mutual: 11, activeMinutes: 9, followsYou: false },
 ];
 
 export const aiTools = [

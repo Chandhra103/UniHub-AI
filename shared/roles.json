@@ -16,7 +16,7 @@
         { "label": "Learning", "path": "/courses", "icon": "book" },
         { "label": "Community", "path": "/community", "icon": "users" }
       ],
-      "allowedPrefixes": ["/dashboard", "/profile", "/events", "/opportunities", "/internships", "/jobs", "/hackathons", "/scholarships", "/courses", "/government-portals", "/ai-tools", "/ai-hub", "/colleges", "/organizations", "/community", "/posts", "/connections", "/messages", "/applications", "/saved", "/rewards", "/notifications", "/settings"],
+      "allowedPrefixes": ["/dashboard", "/profile", "/events", "/opportunities", "/internships", "/jobs", "/hackathons", "/scholarships", "/courses", "/government-portals", "/ai-tools", "/ai-hub", "/colleges", "/organizations", "/community", "/posts", "/connections", "/followers", "/messages", "/applications", "/saved", "/rewards", "/notifications", "/settings"],
       "permissions": ["opportunities.read", "applications.create_own", "applications.read_own", "events.read", "events.register_own", "learning.read", "community.read", "community.create_own", "rewards.read", "profile.read_own", "profile.update_own"]
     },
     {

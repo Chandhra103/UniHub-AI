@@ -142,10 +142,32 @@ test('all UI page routes are declared and manifest has no duplicate entries', as
   const manifest = JSON.parse(await readFile(new URL('../public/manus-routes.json', import.meta.url), 'utf8'));
   const declared = new Set(manifest.routes.map((route) => route.path));
   assert.equal(declared.size, manifest.routes.length);
+  const studentLinks = ['/dashboard/status', '/dashboard/connections', '/dashboard/followers', '/dashboard/posts', '/dashboard/rewards', '/followers'];
+  for (const path of studentLinks) {
+    assert.ok(declared.has(path), `route manifest omits ${path}`);
+    assert.equal(canRoleAccessPath(activeUser('student'), path), true, `students should reach ${path}`);
+  }
+  assert.equal(canRoleAccessPath(activeUser('company'), '/followers'), false);
   for (const role of catalog.roles) {
     assert.ok(declared.has(role.home), `route manifest omits ${role.home}`);
     for (const item of role.nav) assert.ok(declared.has(item.path), `route manifest omits ${item.path}`);
   }
+});
+
+test('student status, rewards, posts and followers shortcuts stay reachable across routes', async () => {
+  const [app, pages, header] = await Promise.all([
+    readFile(new URL('../src/App.tsx', import.meta.url), 'utf8'),
+    readFile(new URL('../src/pages.tsx', import.meta.url), 'utf8'),
+    readFile(new URL('../src/auth/RoleSiteHeader.tsx', import.meta.url), 'utf8'),
+  ]);
+  assert.ok(app.includes("visiblePath.startsWith('/dashboard/')"), 'nested status dashboard links must render the dashboard');
+  assert.ok(app.includes("'/followers',"), 'Followers must be routed to the community view');
+  assert.ok(pages.includes('onClick={() => navigate(tab.path)}'), 'dashboard tabs must navigate through stable paths');
+  assert.ok(pages.includes("path: '/followers'"), 'the Followers summary action must open the Followers route');
+  assert.ok(header.includes("label: 'Status', path: '/dashboard/status'"));
+  assert.ok(header.includes("label: 'Followers', path: '/followers'"));
+  assert.ok(header.includes("label: 'Posts', path: '/posts'"));
+  assert.ok(header.includes("label: 'Rewards', path: '/rewards'"));
 });
 
 test('Vercel root entrypoint exports the Express handler without opening a local listener', async () => {

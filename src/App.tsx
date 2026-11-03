@@ -149,13 +149,13 @@ function AuthenticatedApp() {
     if (user.role === 'student' && !pending && !suspended) page = <StudentWorkspacePage {...actions} path={visiblePath} />;
     else page = <AccountUtilityPage path={visiblePath} user={user} onSave={saveAccountProfile} onNavigate={navigate} onToast={setMessage} />;
   } else if (user.role === 'student') {
-    if (visiblePath === '/dashboard') page = <DashboardPage {...actions} path={visiblePath} user={user} saveProfile={saveAccountProfile} />;
+    if (visiblePath === '/dashboard' || visiblePath.startsWith('/dashboard/')) page = <DashboardPage {...actions} path={visiblePath} user={user} saveProfile={saveAccountProfile} />;
     else if (visiblePath === '/profile') page = <StudentProfilePage {...actions} user={user} saveProfile={saveAccountProfile} />;
     else if (visiblePath.startsWith('/events')) page = <EventsPage {...actions} path={visiblePath} />;
     else if (['/opportunities', '/internships', '/jobs', '/hackathons', '/scholarships', '/courses', '/government-portals'].includes(visiblePath)) page = <OpportunitiesPage {...actions} path={visiblePath} />;
     else if (visiblePath === '/ai-tools' || visiblePath === '/ai-hub') page = <ToolsPage {...actions} path={visiblePath} />;
     else if (visiblePath === '/colleges' || visiblePath === '/organizations') page = <DiscoveryPage {...actions} path={visiblePath} />;
-    else if (['/community', '/posts', '/connections', '/messages'].includes(visiblePath)) page = <CommunityPage {...actions} path={visiblePath} />;
+    else if (['/community', '/posts', '/connections', '/followers', '/messages'].includes(visiblePath)) page = <CommunityPage {...actions} path={visiblePath} />;
     else if (['/applications', '/saved', '/rewards'].includes(visiblePath)) page = <StudentWorkspacePage {...actions} path={visiblePath} />;
     else page = <div className="not-found"><span><GraduationCap size={28}/></span><h1>That page is taking a study break.</h1><p>Explore your student dashboard or find your next opportunity.</p><PrimaryButton onClick={() => navigate(roleHome(user.role))}>Back to dashboard <ArrowRight size={17}/></PrimaryButton></div>;
   } else if (user.role === 'job_seeker' && visiblePath === '/messages') {
