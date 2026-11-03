@@ -31,7 +31,7 @@
 ## External handoff requested
 
 - [x] **GitHub repository.** Push the complete existing UniHub AI project to the user's GitHub account without losing the Manus project history or silently changing unrelated remotes; verify the final repository and branch after the push.
-- [x] **Vercel deployment handoff.** The user will connect and deploy the project from GitHub independently; no Vercel sign-in, account linking or deployment was requested for this handoff. Keep the optional Vercel build config and environment guide available in the repository.
+- [x] **Vercel deployment handoff.** Keep the Vercel build configuration and environment guide available in the repository. The user will import and deploy the GitHub project from their own Vercel account; this handoff validates the repository but does not create or publish a Vercel project.
 
 ## Outstanding account/deployment requirements
 
