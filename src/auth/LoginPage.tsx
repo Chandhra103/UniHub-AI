@@ -11,6 +11,8 @@ const errorCopy: Record<string, string> = {
   'oauth-denied': 'Sign-in was cancelled. You can try again when you are ready.',
   'state-invalid': 'The secure sign-in request expired or could not be verified. Please start again.',
   'oauth-code-missing': 'The account provider did not return a sign-in code. Please try again.',
+  'auth-not-configured': 'Sign-in is not configured on this deployment. Ask the administrator to add the Manus OAuth settings and session secret in Vercel.',
+  'database-not-configured': 'Account storage is not configured. Ask the administrator to add DATABASE_URL and apply the UniHub database migration.',
   'oauth-failed': 'Sign-in could not be completed. Please try again or contact support.',
 };
 

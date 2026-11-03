@@ -8,13 +8,20 @@ const OAUTH_STATE_COOKIE = 'unihub_oauth_state';
 const PREVIEW_ORIGIN = 'https://8328-ixljuwijnisa6109lx7qx-70870a65.sg2.manus.computer';
 const LOCAL_ORIGINS = ['http://localhost:3000', 'http://127.0.0.1:3000'];
 
+function authConfigurationError() {
+  const error = new Error('Sign-in is not configured on this deployment. Please ask the administrator to configure Manus OAuth and session settings in Vercel.');
+  error.code = 'AUTH_CONFIGURATION';
+  error.status = 503;
+  return error;
+}
+
 function projectId() {
-  if (!process.env.MANUS_PROJECT_ID) throw new Error('Manus project authentication is not configured.');
+  if (!process.env.MANUS_PROJECT_ID) throw authConfigurationError();
   return process.env.MANUS_PROJECT_ID;
 }
 
 function jwtSecret() {
-  if (!process.env.MANUS_JWT_SECRET) throw new Error('Manus session signing is not configured.');
+  if (!process.env.MANUS_JWT_SECRET) throw authConfigurationError();
   return process.env.MANUS_JWT_SECRET;
 }
 
@@ -148,21 +155,23 @@ export function startOAuth(req, res) {
     error.status = 403;
     throw error;
   }
-  const portal = process.env.MANUS_OAUTH_PORTAL_URL;
-  if (!portal) throw new Error('Manus sign-in is not configured.');
+  const portal = process.env.MANUS_OAUTH_PORTAL_URL?.trim();
+  if (!portal || !process.env.MANUS_OAUTH_API_URL?.trim()) throw authConfigurationError();
+  const clientId = projectId();
+  const secret = jwtSecret();
   const redirectUri = new URL('/api/auth/callback', origin).toString();
   const nonce = randomBytes(32).toString('base64url');
   const requestedRole = typeof req.body?.role === 'string' ? req.body.role : 'student';
   const organizationName = typeof req.body?.organizationName === 'string' ? req.body.organizationName.trim().slice(0, 200) : '';
   const stateCookie = jwt.sign(
     { nonce, redirectUri, origin, requestedRole, organizationName },
-    jwtSecret(),
+    secret,
     { algorithm: 'HS256', expiresIn: '5m' },
   );
   setOAuthStateCookie(res, stateCookie, origin.startsWith('https://'));
   const state = Buffer.from(JSON.stringify({ redirectUri, nonce }), 'utf8').toString('base64');
   const authorizationUrl = new URL(`${portal.replace(/\/+$/, '')}/app-auth`);
-  authorizationUrl.searchParams.set('appId', projectId());
+  authorizationUrl.searchParams.set('appId', clientId);
   authorizationUrl.searchParams.set('redirectUri', redirectUri);
   authorizationUrl.searchParams.set('state', state);
   authorizationUrl.searchParams.set('responseType', 'code');
@@ -182,7 +191,7 @@ async function postJson(url, body) {
 
 async function exchangeCode(code, redirectUri) {
   const api = process.env.MANUS_OAUTH_API_URL?.replace(/\/+$/, '');
-  if (!api) throw new Error('Manus OAuth API is not configured.');
+  if (!api) throw authConfigurationError();
   const tokenResult = await postJson(
     `${api}/webdev.v1.WebDevAuthPublicService/ExchangeToken`,
     { clientId: projectId(), grantType: 'authorization_code', code, redirectUri },
@@ -251,6 +260,8 @@ export async function finishOAuth(req, res, ensureUserForOAuth) {
     return res.redirect(303, destination);
   } catch (error) {
     console.error(`OAuth completion failed: ${error instanceof Error ? error.message : 'unknown error'}`);
+    if (error?.code === 'AUTH_CONFIGURATION') return res.redirect(303, '/login?error=auth-not-configured');
+    if (error?.code === 'DATABASE_CONFIGURATION') return res.redirect(303, '/login?error=database-not-configured');
     return res.redirect(303, '/login?error=oauth-failed');
   }
 }

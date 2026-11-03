@@ -28,6 +28,16 @@ function httpError(message, status = 400) {
   return error;
 }
 
+function apiErrorMessage(error) {
+  if (error?.code === 'AUTH_CONFIGURATION') {
+    return 'Sign-in is not configured on this deployment. Ask the administrator to add the Manus OAuth settings and session secret in Vercel.';
+  }
+  if (error?.code === 'DATABASE_CONFIGURATION') {
+    return 'Account storage is not configured. Ask the administrator to add DATABASE_URL and apply the UniHub database migration.';
+  }
+  return error?.status && error.status < 500 ? error.message : 'The request could not be completed.';
+}
+
 async function sessionFor(req, res) {
   return resolveSession(req, res, getUserByOpenId, ensureUserForOAuth);
 }
@@ -583,7 +593,7 @@ if (isDev) {
     vite.ssrFixStacktrace(error);
     console.error(error);
     if (res.headersSent) return;
-    return res.status(error.status || 500).json({ error: 'The request could not be completed.' });
+    return res.status(error.status || 500).json({ error: apiErrorMessage(error) });
   });
   httpServer.listen(port, '0.0.0.0', () => console.info(`UniHub development server listening on ${port}.`));
   const shutdown = async () => { await vite.close(); httpServer.close(() => process.exit(0)); };
@@ -599,7 +609,7 @@ if (isDev) {
   app.use((error, _req, res, _next) => {
     console.error(`Request failed: ${error instanceof Error ? error.message : 'unknown error'}`);
     if (res.headersSent) return;
-    return res.status(error.status || 500).json({ error: error.status && error.status < 500 ? error.message : 'The request could not be completed.' });
+    return res.status(error.status || 500).json({ error: apiErrorMessage(error) });
   });
   if (isMainModule) {
     const httpServer = http.createServer(app);

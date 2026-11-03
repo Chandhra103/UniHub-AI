@@ -7,7 +7,12 @@ const databaseUrl = process.env.DATABASE_URL || process.env.DRIZZLE_DATABASE_URL
 let pool;
 
 export function getPool() {
-  if (!databaseUrl) throw new Error('Managed database connection is not configured.');
+  if (!databaseUrl) {
+    const error = new Error('Account storage is not configured on this deployment.');
+    error.code = 'DATABASE_CONFIGURATION';
+    error.status = 503;
+    throw error;
+  }
   if (!pool) {
     // The managed DSN supplies its connection/transport parameters; never log the DSN.
     pool = mysql.createPool(databaseUrl);

@@ -34,6 +34,12 @@ The project needs a MySQL endpoint reachable from Vercel. The Manus database URL
 
 Vercel sets `VERCEL_URL` for each deployment. OAuth origin validation accepts its exact HTTPS host, as well as explicitly configured `UNIHUB_ALLOWED_ORIGINS`/`PUBLIC_APP_URL` values, the current Manus Preview origin, and local development origins. Add any custom production domain to `UNIHUB_ALLOWED_ORIGINS` as its exact origin (for example `https://unihub.example.com`). The callback URL is derived from the validated browser origin and uses `/api/auth/callback`.
 
+### Login troubleshooting
+
+The login page uses Manus OAuth; it does not authenticate arbitrary email/password entries. A missing OAuth project ID, session secret, portal URL or API URL now causes `POST /api/auth/start` to return a clear `503` setup message before redirecting to the provider. Add all four values to the Vercel Production and Preview environments, then redeploy.
+
+After the provider redirects back, account creation also requires a reachable MySQL database and the core migration. The login page reports a specific database-configuration message when `DATABASE_URL` is missing. For other `oauth-failed` errors, inspect Vercel function logs and confirm the OAuth service and database are reachable; never put secret values in GitHub or client-side code.
+
 Before declaring a deployment production-ready, verify the static route manifest, SPA deep links, `/_app/health`, Manus OAuth callback, CSRF-protected mutations, all role route permissions, and the configured MySQL migration against accounts explicitly authorized for the target project. Do not create test identities or application data in the shared production database as part of a smoke test.
 
 ## References

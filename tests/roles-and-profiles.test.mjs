@@ -113,11 +113,12 @@ test('administrator bootstrap is granted only to an explicitly allowlisted email
 });
 
 test('OAuth accepts exact HTTPS Vercel deployment origins and sets iframe-safe cookies', () => {
-  const env = ['MANUS_PROJECT_ID', 'MANUS_JWT_SECRET', 'MANUS_OAUTH_PORTAL_URL', 'VERCEL_URL'];
+  const env = ['MANUS_PROJECT_ID', 'MANUS_JWT_SECRET', 'MANUS_OAUTH_PORTAL_URL', 'MANUS_OAUTH_API_URL', 'VERCEL_URL'];
   const previous = Object.fromEntries(env.map((key) => [key, process.env[key]]));
   process.env.MANUS_PROJECT_ID = 'fixture-project';
   process.env.MANUS_JWT_SECRET = 'test-only-secret-not-used-outside-this-process';
   process.env.MANUS_OAUTH_PORTAL_URL = 'https://auth.example.test';
+  process.env.MANUS_OAUTH_API_URL = 'https://api.example.test';
   process.env.VERCEL_URL = 'unihub-preview.vercel.app';
   try {
     assert.equal(validatePublicOrigin('https://unihub-preview.vercel.app'), 'https://unihub-preview.vercel.app');
@@ -189,6 +190,42 @@ test('Vercel Express root entrypoint imports and constructs Express directly', a
   const source = await readFile(new URL('../index.mjs', import.meta.url), 'utf8');
   assert.match(source, /import express from ['"]express['"]/);
   assert.match(source, /const app\s*=\s*express\(\)/);
+});
+
+test('login API explains missing Manus OAuth setup instead of returning a generic server error', async () => {
+  const keys = [
+    'VERCEL', 'VERCEL_URL', 'VERCEL_PROJECT_PRODUCTION_URL', 'UNIHUB_ALLOWED_ORIGINS', 'PUBLIC_APP_URL',
+    'MANUS_PROJECT_ID', 'MANUS_JWT_SECRET', 'MANUS_OAUTH_PORTAL_URL', 'MANUS_OAUTH_API_URL',
+  ];
+  const previous = Object.fromEntries(keys.map((key) => [key, process.env[key]]));
+  for (const key of keys) delete process.env[key];
+  process.env.VERCEL = '1';
+  process.env.VERCEL_URL = 'login-test.vercel.app';
+  let server;
+  try {
+    const { default: app } = await import('../index.mjs');
+    server = app.listen(0, '127.0.0.1');
+    await new Promise((resolve, reject) => {
+      server.once('listening', resolve);
+      server.once('error', reject);
+    });
+    const address = server.address();
+    assert.ok(address && typeof address === 'object');
+    const response = await fetch(`http://127.0.0.1:${address.port}/api/auth/start`, {
+      method: 'POST',
+      headers: { Origin: 'https://login-test.vercel.app', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role: 'student' }),
+    });
+    const body = await response.json();
+    assert.equal(response.status, 503);
+    assert.match(body.error, /Manus OAuth settings and session secret.*Vercel/i);
+  } finally {
+    if (server) await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+    for (const key of keys) {
+      if (previous[key] === undefined) delete process.env[key];
+      else process.env[key] = previous[key];
+    }
+  }
 });
 
 test('Vercel root entrypoint exports the Express handler without opening a local listener', async () => {
