@@ -179,6 +179,12 @@ test('Vercel configuration selects Express and avoids unmatched root function pa
   }
 });
 
+test('Vercel build pins a supported Node major and approves only the pinned esbuild install script', async () => {
+  const manifest = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
+  assert.equal(manifest.engines.node, '22.x');
+  assert.equal(manifest.allowScripts?.['esbuild@0.25.12'], true);
+});
+
 test('Vercel root entrypoint exports the Express handler without opening a local listener', async () => {
   const entry = await import('../index.mjs');
   assert.equal(typeof entry.default, 'function');

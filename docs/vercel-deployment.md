@@ -6,7 +6,9 @@ Do not add a `functions` pattern for the root `index.mjs`. Vercel's `functions` 
 
 ## Import and build
 
-Import `Chandhra103/UniHub-AI` from Vercel with the repository root as the project root. The checked-in `framework: "express"` setting selects the Express preset even though the frontend is built with Vite. Keep the configured `npm run build` command. Use `main` for production once it is ready; other branches can be used for previews.
+Import `Chandhra103/UniHub-AI` from Vercel with the repository root as the project root. The checked-in `framework: "express"` setting selects the Express preset even though the frontend is built with Vite. Keep the configured `npm run build` command. `package.json` pins the build/runtime Node major to `22.x`, which is supported by Vercel and avoids floating to the newest major from the previous `>=20.0.0` range.
+
+The Vite build uses `esbuild@0.25.12`. The package manifest includes a version-pinned npm `allowScripts` approval for esbuild because npm 12 blocks unapproved dependency install scripts; this lets esbuild's required install step run without approving every dependency. If esbuild is upgraded, review and refresh that pinned approval.
 
 A local production check uses:
 
@@ -39,5 +41,7 @@ Before declaring a deployment production-ready, verify the static route manifest
 - [Express on Vercel](https://vercel.com/docs/frameworks/backend/express) — Express entrypoint and static asset behavior.
 - [Vercel project configuration](https://vercel.com/docs/project-configuration/vercel-json) — framework presets and function patterns.
 - [Unmatched function pattern error](https://vercel.com/docs/errors/error-list) — Vercel's requirements for the `functions` key.
-- [Vite on Vercel](https://vercel.com/docs/frameworks/frontend/vite) — SPA rewrite behavior for projects using the Vite preset.
+- [Supported Node.js versions on Vercel](https://vercel.com/docs/functions/runtimes/node-js/node-js-versions) — available Node.js majors and `engines.node` mapping.
+- [npm install-script approvals](https://docs.npmjs.com/cli/v12/commands/npm-install-scripts/) — version-pinned dependency lifecycle-script approvals.
+- [esbuild and npm 12 install scripts](https://github.com/evanw/esbuild/issues/4499) — the esbuild install-script behavior seen in the Vercel log.
 - [Vercel environment variables](https://vercel.com/docs/environment-variables) — server-side runtime configuration and deployment refresh behavior.
